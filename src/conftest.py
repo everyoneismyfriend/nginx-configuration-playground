@@ -3,6 +3,7 @@ from typing import Callable, Iterator
 
 import pytest
 from testcontainers.core.image import DockerImage
+from testcontainers.core.network import Network
 
 from src.utils import NginxContainer
 
@@ -25,6 +26,7 @@ def nginx_image() -> Iterator[Callable[..., DockerImage]]:
                 dockerfile_path=normalize_path(dockerfile),
                 clean_up=False,
             )
+
             image.build()
             built_images[image.tag] = image
 
@@ -37,21 +39,39 @@ def nginx_image() -> Iterator[Callable[..., DockerImage]]:
 
 
 @pytest.fixture(scope='session')
-def nginx_container() -> Iterator[Callable[..., NginxContainer]]:
+def network() -> Iterator[Network]:
+    network = Network()
+    network.create()
+
+    yield network
+
+    network.remove()
+
+
+@pytest.fixture(scope='session')
+def nginx_container(network) -> Iterator[Callable[..., NginxContainer]]:
     running_containers = {}
 
-    def factory(image_tag: str, config: Path) -> NginxContainer:
+    def factory(image_tag: str,
+                config: Path,
+                name: str | None = None,
+                ) -> NginxContainer:
         # ToDo: parametrize port and container-side path
 
-        container_key = image_tag, normalize_path(config)
+        container_key = image_tag, name, normalize_path(config)
         container = running_containers.get(container_key)
 
         if not container:
-            container = NginxContainer(image=image_tag) \
-                .with_volume_mapping(
-                    host=normalize_path(config),
-                    container='/etc/nginx/nginx.conf',
-                )
+            container = NginxContainer(image=image_tag)
+            container.with_network(network)
+            container.with_volume_mapping(
+                host=normalize_path(config),
+                container='/etc/nginx/nginx.conf',
+            )
+            if name is not None:
+                container.with_name(name)
+
+            # ToDo: handle failures on startup
             container.start()
             running_containers[container_key] = container
 
