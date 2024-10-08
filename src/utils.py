@@ -33,3 +33,11 @@ class NginxContainer(DockerContainer):
             raise ConnectionError() from ex
 
         return response.status_code < 500
+
+
+def parse_uri(uri: str) -> tuple[str, dict[str, str]]:
+    parsed_uri = urllib.parse.urlparse(uri)
+    query = urllib.parse.parse_qs(parsed_uri.query)
+    params = {key: value[0] for key, value in query.items()}
+
+    return parsed_uri.path, params

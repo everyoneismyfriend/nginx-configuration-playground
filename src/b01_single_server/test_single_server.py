@@ -8,7 +8,7 @@ base_path = Path(__file__).parent
 def test_custom_image(nginx_image, nginx_container):
     image = nginx_image(
         tag='test-image:latest',
-        dockerfile=base_path.parent / 'Dockerfile',
+        dockerfile=base_path / 'Dockerfile',
     )
     container = nginx_container(
         image_tag=image.tag,
