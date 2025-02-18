@@ -1,12 +1,10 @@
 from pathlib import Path
 
-import pytest
 import requests
 
 base_path = Path(__file__).parent
 
 
-@pytest.mark.current
 def test_requests_from_ru_and_by_are_blocked(nginx_image, nginx_container):
     image = nginx_image(tag='test-image:latest', dockerfile=base_path / 'Dockerfile')
     container = nginx_container(image_tag=image.tag, config=base_path / 'nginx.conf')

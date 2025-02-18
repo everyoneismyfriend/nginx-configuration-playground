@@ -16,7 +16,10 @@ def normalize_path(path: Path) -> str:
 def nginx_image() -> Iterator[Callable[..., DockerImage]]:
     built_images = {}
 
-    def factory(tag: str, dockerfile: Path | None = None) -> DockerImage:
+    def factory(tag: str,
+                dockerfile: Path | None = None,
+                build_args: dict | None = None,
+                ) -> DockerImage:
         image = built_images.get(tag)
 
         if not image:
@@ -27,7 +30,7 @@ def nginx_image() -> Iterator[Callable[..., DockerImage]]:
                 clean_up=False,
             )
 
-            image.build()
+            image.build(buildargs=build_args or {})
             built_images[image.tag] = image
 
         return image

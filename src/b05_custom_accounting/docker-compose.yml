@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  nginx:
+    build:
+      context: ./
+      args:
+        NGX_TRAFFIC_ACCOUNTING_GITLAB_TOKEN: "${NGX_TRAFFIC_ACCOUNTING_GITLAB_TOKEN}"
+        NGX_TRAFFIC_ACCOUNTING_GIT_BRANCH: "${NGX_TRAFFIC_ACCOUNTING_GIT_BRANCH}"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    hostname: "nginx"
+    ports:
+      - "80:80"
