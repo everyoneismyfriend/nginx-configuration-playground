@@ -58,6 +58,7 @@ def nginx_container(network) -> Iterator[Callable[..., NginxContainer]]:
     def factory(image_tag: str,
                 config: Path,
                 name: str | None = None,
+                volumes: dict[Path, str] | None = None,
                 ) -> NginxContainer:
         # ToDo: parametrize port and container-side path
 
@@ -73,6 +74,13 @@ def nginx_container(network) -> Iterator[Callable[..., NginxContainer]]:
             )
             if name is not None:
                 container.with_name(name)
+
+            if volumes is not None:
+                for host_path, container_path in volumes.items():
+                    container.with_volume_mapping(
+                        host=normalize_path(host_path),
+                        container=container_path,
+                    )
 
             # ToDo: handle failures on startup
             container.start()
