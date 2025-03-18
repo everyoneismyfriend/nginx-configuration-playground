@@ -20,6 +20,10 @@
 1. Протестировать работу директивы `proxy_intercept_errors`
 2. Протестировать формат ответа URL в формате urlset, если какого-то из компонентов нет
 3. Собрать минимальную конфигурацию, с которой можно протестировать редиректы
+4. Написать и протестировать rewrite правило для генерации multi-source ссылок
+  - Запрос к серверу VoD: `http://vod/hls/example.mp4/master.m3u8`
+  - Запрос к origin: `http://origin/example__,240,360,480,p.mp4.urlset/master.m3u8`
+  - Запрос к backend: `http://backend/?filename=example.mp4&rendition=240&rendition=360&rendition=480`
 
 ---
 
