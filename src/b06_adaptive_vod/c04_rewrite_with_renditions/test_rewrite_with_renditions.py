@@ -19,6 +19,12 @@ def vod_container(nginx_image, nginx_container):
         config=base_path / 'backend.conf',
         name='backend-4',
     )
+    nginx_container(
+        image_tag='nginx:latest',
+        config=base_path / 'storage.conf',
+        volumes={base_path.parent / 'media': '/media'},
+        name='storage-4',
+    )
     vod_image = nginx_image(
         tag='test-image:latest',
         dockerfile=base_path / 'Dockerfile',
