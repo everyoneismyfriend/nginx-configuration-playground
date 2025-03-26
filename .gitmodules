@@ -1,0 +1,4 @@
+[submodule "traffic-accounting"]
+	path = src/b07_accounting_features/traffic-accounting
+	url = git@gitlab.itglobal.com:cdn/traffic-accounting.git
+	branch = features_accounting

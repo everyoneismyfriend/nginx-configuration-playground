@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path
 from typing import Callable, Iterator
 
@@ -10,6 +11,17 @@ from src.utils import NginxContainer
 
 def normalize_path(path: Path) -> str:
     return path.absolute().as_posix()
+
+
+@pytest.fixture
+def temp_file() -> Iterator[Path]:
+    temp_dir = tempfile.TemporaryDirectory()
+    temp_file = Path(temp_dir.name) / 'nginx.conf'
+    temp_file.touch()
+
+    yield temp_file
+
+    temp_dir.cleanup()
 
 
 @pytest.fixture(scope='session')
@@ -56,7 +68,7 @@ def nginx_container(network) -> Iterator[Callable[..., NginxContainer]]:
     running_containers = {}
 
     def factory(image_tag: str,
-                config: Path,
+                config: Path | str,
                 name: str | None = None,
                 volumes: dict[Path, str] | None = None,
                 ) -> NginxContainer:
