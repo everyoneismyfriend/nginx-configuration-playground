@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  origin:
+    image: "nginx:latest"
+    volumes:
+      - ./origin.conf:/etc/nginx/nginx.conf
+      - ../media:/media
+    hostname: "origin-4"
+    ports:
+      - "81:80"
+
+  backend:
+    image: "nginx:latest"
+    volumes:
+      - ./backend.conf:/etc/nginx/nginx.conf
+    hostname: "backend-4"
+    ports:
+      - "82:80"
+
+  storage:
+    image: "nginx:latest"
+    volumes:
+      - ./storage.conf:/etc/nginx/nginx.conf
+      - ../media:/media
+    hostname: "storage-4"
+    ports:
+      - "83:80"
+
+  vod:
+    build: .
+    volumes:
+      - ./vod.conf:/etc/nginx/nginx.conf
+    hostname: "vod-4"
+    ports:
+      - "80:80"
