@@ -21,8 +21,13 @@ def vod_container(nginx_image, nginx_container):
     )
     nginx_container(
         image_tag='nginx:latest',
-        config=base_path / 'storage.conf',
+        config=base_path / 'storage_origin.conf',
         volumes={base_path.parent / 'media': '/media'},
+        name='storage-origin-4',
+    )
+    nginx_container(
+        image_tag='nginx:latest',
+        config=base_path / 'storage.conf',
         name='storage-4',
     )
     vod_image = nginx_image(
@@ -47,6 +52,7 @@ def test_non_adaptive_resource(vod_container):
     assert '#EXTM3U' in response.text
 
 
+@pytest.mark.current
 def test_adaptive_resource_existing_resource(vod_container):
     file_names = [
         'SampleVideo_1280x720_10mb__240p.mp4',
@@ -58,6 +64,14 @@ def test_adaptive_resource_existing_resource(vod_container):
     path = f'/hls/adaptive/{file_name}/master.m3u8'
 
     response = requests.get(vod_container.url + path)
+    # print()
+    # print(response.status_code)
+    # print(response.text)
+    #
+    # import time
+    # for i in range(120, 0, -1):
+    #     print(i)
+    #     time.sleep(1)
 
     assert response.status_code == 200
     assert '#EXTM3U' in response.text
@@ -72,3 +86,9 @@ def test_adaptive_resource_nonexistent_resource(vod_container):
 
     assert response.status_code == 200
     assert 'backend' in response.text
+
+
+'''
+http://localhost/hls/non-adaptive/SampleVideo_1280x720_10mb.mp4/master.m3u8
+http://localhost/hls/adaptive/SampleVideo_1280x720_10mb.mp4/master.m3u8
+'''

@@ -27,6 +27,15 @@ services:
     ports:
       - "83:80"
 
+  storage_origin:
+    image: "nginx:latest"
+    volumes:
+      - ./storage_origin.conf:/etc/nginx/nginx.conf
+      - ../media:/media
+    hostname: "storage-origin-4"
+    ports:
+      - "84:80"
+
   vod:
     build: .
     volumes:
