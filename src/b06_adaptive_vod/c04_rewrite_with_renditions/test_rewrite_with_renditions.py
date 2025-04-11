@@ -7,17 +7,21 @@ base_path = Path(__file__).parent
 
 
 @pytest.fixture(scope='module')
-def vod_container(nginx_image, nginx_container):
+def backend_container(nginx_container):
+    return nginx_container(
+        image_tag='nginx:latest',
+        config=base_path / 'backend.conf',
+        name='backend-4',
+    )
+
+
+@pytest.fixture(scope='module')
+def vod_container(nginx_image, nginx_container, backend_container):
     nginx_container(
         image_tag='nginx:latest',
         config=base_path / 'origin.conf',
         volumes={base_path.parent / 'media': '/media'},
         name='origin-4',
-    )
-    nginx_container(
-        image_tag='nginx:latest',
-        config=base_path / 'backend.conf',
-        name='backend-4',
     )
     nginx_container(
         image_tag='nginx:latest',
@@ -64,11 +68,16 @@ def test_adaptive_resource_existing_resource(vod_container):
     assert all(file_name in response.text for file_name in file_names)
 
 
-def test_adaptive_resource_nonexistent_resource(vod_container):
-    file_name = 'nonexistent.mp4'
+def test_adaptive_resource_nonexistent_resource(vod_container, backend_container):
+    file_name = 'non-rescaled.mp4'
     path = f'/hls/adaptive/{file_name}/master.m3u8'
 
-    response = requests.get(vod_container.url + path)
+    response = requests.get(
+        vod_container.url + path,
+        headers={'vod-url': vod_container.url},
+    )
 
     assert response.status_code == 200
-    assert 'backend' in response.text
+    assert '#EXTM3U' in response.text
+    backend_logs = '\n'.join(log.decode() for log in backend_container.get_logs())
+    assert file_name in backend_logs
